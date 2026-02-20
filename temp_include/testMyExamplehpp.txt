@@ -1,0 +1,54 @@
+#pragma once 
+#include "MyGame2D.hpp"
+#include "Render.hpp"
+
+//코딩 검토용 예제 MyGame2D를 상속받는 예제들 updata 메서드 만 오버라이딩. 
+//하는 것으로 정리해서 옮김. 
+
+//1.4 이동. 
+class MyDrawTest : public MyGame2D{
+public : 
+    void update(const float& dt) override; 
+    
+};
+
+// 1.4 별이 도는 예제 다시 직접코딩 하기. 
+// 회전 문제 -glfwGetTime함수로 조정. 
+class MrotatingStar: public MyGame2D {
+    float rotatingTime=0.0f;  //초기 값 설정 
+    float curAngle =0.0f; //현재 누적된 회전 각도. 
+    //120일경우 초당 120도 를 의미 
+    float rotatingSpeed=60.0f; //약 3초에 한바퀴 --> 적용 않되는듯.?? 120--> 60
+public : 
+    void update(const float& dt) override; 
+    void setSpeed(const float speed); 
+    float getSpeed(); 
+}; 
+
+//1.5 솔라시스템 예제 다시 코딩. 
+class MsolarSystem :public MyGame2D{
+private: 
+    float curAngle =0.0f; 
+    float curAngleEarth =0.0f; 
+    float curAngleSun =0.0f; 
+
+    float rotatingSpeed =60.0f; 
+    float rotatingSpeedEarth =30.0f; 
+    float rotatingSpeedSun =15.0f; 
+public :     
+    void update(const float& dt) override; 
+}; 
+
+class TranslateBox : public MyGame2D{
+private: 
+    float curAngle=0.0f; 
+    float rotatingSpeed =60.0f; 
+public: 
+    void update(const float& dt) override ; 
+}; 
+
+class PrimtiveMyGallery:public MyGame2D{
+    private: 
+    public: 
+    void update(const float& dt) override; 
+}; 

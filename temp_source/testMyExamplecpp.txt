@@ -1,0 +1,282 @@
+#include "testMyExample.hpp"
+// #include "MyUtils.hpp"
+//삼각형 그리기 테스트 
+void MyDrawTest:: update(const float& dt){
+    unsigned int mode =0; 
+    if(mode == 0){
+        MyVector<float> point1(0.0f, 0.0f, 0.0f);
+        MyVector<float> point2(0.5f, 0.5f, 0.0f);
+        MyVector<float> point3(0.5f, 0.0f, 0.0f);
+
+        // MyVector<float> color(1.0f, 0.0f, 0.0f); 
+        // MyRGB color(255, 255, 0); 
+        // std::cout << "in MyDrawTest : " <<point1 << std::endl; 	
+        glBegin(GL_TRIANGLES); 
+        {
+            //변경된 컬러값 반영. run에서 updata호출 이전에 호출 하는 것으로 변경 하거나. 혹 get/set, 파라미터로 전달. 
+            // glColor3fv(getColor().rgb); 
+            glVertex2fv(point1.data); 
+            glVertex2fv(point2.data); 
+            glVertex2fv(point3.data); 
+        }
+        glEnd(); 
+    }
+}
+
+void MrotatingStar::setSpeed(const float speed){
+    rotatingSpeed=speed; 
+}
+float MrotatingStar::getSpeed(){
+    return rotatingSpeed; 
+}
+
+/**1.5 add & move to myGame2D 
+ * 키보드로 회전 속도 조절 -->> 뭔가 잘 않됨. --> run()메서드 수정 이후 제대로 동작.
+ * 1.6 시간의 변화량을 입력 받는 것으로 수정. 
+ * 
+ * 회전이 어색한 문제는 누적시간에 속도를 곱하는 부분에서 발생. 
+ * --> 프레임 마다 시간의 변화량 만큼을 더해 주는 방식으로 수정해야. --> 잘 않됨. 
+ * --> glGetTime으로 센컨 단위로 시간을 받아 오는 것으로 해결. 
+*/
+void MrotatingStar::update(const float& dt){
+    /**1.4 키 입력이 update에서 회전 값을 조정하도록 변경.  
+     * 1.5 키 입력을 한번만 받도록 수정. 현재는 여러번의 키 입력으로 
+     * 현재는 update주기에 마추어 키 입력 값이 감지됨. 
+     * isKeyPressed에서 isKeyJustPressed로 변경. 
+    */
+    if(isKeyJustPressed(GLFW_KEY_UP)){
+        // rotatingSpeed += 10.0f; 
+        setSpeed(rotatingSpeed += 10.0f); 
+        std::cout << " UP speed : " << rotatingSpeed << std::endl; 
+    }
+    
+    if(isKeyJustPressed(GLFW_KEY_DOWN)){
+        rotatingSpeed -= 10.0f; 
+        if(rotatingSpeed < 0 ){
+            rotatingSpeed =0; 
+        }
+        std::cout << " DOWN speed : " << rotatingSpeed << std::endl; 
+    }
+    //정지 
+    if(isKeyJustPressed(GLFW_KEY_SPACE)){
+        rotatingSpeed= 0.0f; 
+        std::cout << " STOP speed : " << rotatingSpeed << std::endl; 
+    }
+    
+    if(isKeyJustPressed(GLFW_KEY_R)){
+        rotatingSpeed=120.0F; 
+        std::cout << " RESET speed : " << rotatingSpeed << std::endl; 
+    }
+
+    //1.6 시간변화량 적용 새로운 각도 = 기존각도 +(초당 회전속도 * 경과 시간)
+    curAngle +=rotatingSpeed *dt; 
+    if(curAngle > 360.0f) curAngle  -= 360.0f;  //360 보다 크다면 360도 나머지 연산 
+
+    MyRGB color(0, 255, 0); 
+
+    // glPushMatrix(); --> 여기서는 사실상 필요 없은 run함수에서 이미 사용. 
+
+    // glColor3fv(color.rgb); --> 없어도 drawStarFilled에서 파라미터로 전달. 
+    //glRotatef(angle, x, y, z)  -- 현재는 z 축을 기준으로 회전. 
+    //angle는 회전할 각도로 양수라면 반 시계 방향.  
+    // glRotatef(rotatingTime * rotatingSpeed, 0.0, 0.0, 1.0); // --> 제대로 동작. 
+    glRotatef(curAngle, 0.0, 0.0, 1.0); // curAngel로 변경. 
+    PrimitiveRenderer::drawStarFilled(color, 0.4f, 0.25f); 
+    // glPopMatrix(); 
+
+    //이부분이 없어야 회전이 원하는데로 나온다. --> Vsynd설정이후에 변화 --> 시간변화량 적용 다시 주석 
+    // rotatingTime += this->getTimeStamp(); //이전 소스에서 사용한 방식. --> 나는 왜 않되지? 
+
+}
+
+//1.5 add 태양계를 시뮬레이션 태양이 돌고, 지구가 돌며 그 사이에 달이 도는 모습으로
+/** 계층적 모델로 인해서 저음 그린 객체의 좌표에 다음 객체가 영향을 받음. 
+ * 만약 별도로 동작 하게 하려면 각각의 객체를 glPushMatrix/ glPopMartix로 감싸서 다르게 움직이도록 해야. --> 실습해 봐야. 
+*/
+void MsolarSystem:: update(const float& dt){
+
+    curAngle += rotatingSpeed *dt; //달
+    if(curAngle > 360.0f) curAngle -=360.0f; 
+    
+    curAngleEarth += rotatingSpeedEarth * dt;  //지구의 회전 
+    if(curAngleEarth > 360.0f) curAngleEarth -=360.0f; 
+
+    curAngleSun += rotatingSpeedSun * dt;  //태양의 회전 
+    if(curAngleSun > 360.0f) curAngleSun -=360.0f; 
+
+    glPushMatrix(); //여러개의 객체가 각각 움직일때 다시 호출해야. 
+    {
+        glScalef(0.8f, 0.8f, 1.0f); //전체 스케일을 작게 조정. 
+
+        glRotatef(curAngleSun, 0.0, 0.0, 1.0); 
+        PrimitiveRenderer::drawStarFilled(MyRGB(255, 223, 0), 0.2f, 0.13f); //골드 // sun 
+
+
+        /** //이동 순서 바꾸어 보기  
+        glRotatef(curAngleEarth, 0.0, 0.0, 1.0); //역순으로 실행. 
+        glTranslatef(0.8f, 0.0f, 0.0f);  //실행 순서 1.위치 이동. 
+        */
+        glRotatef(curAngleEarth, 0.0, 0.0, 1.0); 
+        glTranslatef(0.8f, 0.0f, 0.0f);  //먼저 좌표게 이동이 이루어 지고 회전이 일어난다. 
+        PrimitiveRenderer::drawCircleFilled(MyRGB(0,0,255), 0.1f); //파랑. earth 
+        
+        glRotatef(curAngle, 0.0, 0.0, 1.0); 
+        glTranslatef(0.25f, 0.0f, 0.0f);  //실행 순서 1.위치 이동. 
+        PrimitiveRenderer::drawCircleFilled(MyRGB(255,255,0),0.03f ); //노랑. moon 
+    }
+    glPopMatrix(); 
+}
+
+void TranslateBox::update(const float& dt){
+    unsigned int mode =2; 
+    MyRGB red(255, 0, 0); 
+    MyRGB blue(0,0,255); 
+    MyRGB yellow(255, 255, 0); 
+    MyRGB skyblue(178, 255, 255);
+    MyRGB black(0, 0,0); 
+    MyRGB gold(255, 223, 0); 
+
+    curAngle += rotatingSpeed* dt;  
+    if(curAngle > 360.0f) curAngle -= 360.0f; 
+
+    //현재 rotate 함수는 원점에 대해서 회전 
+    if(mode == 0){
+        glPushMatrix();
+        {
+            // glRotatef(30.0f, 0.0f, 0.0f, 1.0); 
+            // glTranslatef(0.25f, 0.0f, 0.0f); 
+            PrimitiveRenderer::drawBoxWired(red, 0.5f, 0.25f); 
+        } 
+        glPopMatrix(); 
+        //
+        glPushMatrix();
+        {
+            glTranslatef(0.25f, 0.5f, 0.0f); 
+            glRotatef(curAngle, 0.0f, 0.0f, 1.0); 
+            PrimitiveRenderer::drawBoxWired(blue, 0.5f, 0.25f); 
+        } 
+        glPopMatrix(); 
+        //
+        glPushMatrix();
+        {
+            glRotatef(curAngle, 0.0f, 0.0f, 1.0); 
+            glTranslatef(0.25f, 0.0f, 0.0f); 
+            PrimitiveRenderer::drawBoxWired(skyblue, 0.5f, 0.25f); 
+        } 
+        glPopMatrix(); 
+        
+    } 
+    //원점이 아닌 점에 대해서 회전하가. 
+    else if(mode ==1){
+        myVec centerOfRotation(-0.4f, 0.0f, 0.0f); 
+        // glPushMatrix();
+        {
+            glLineWidth(static_cast<float>(3)); 
+            // glRotatef(curAngle, 0.0f, 0.0f, 1.0); 
+            // glTranslatef(0.25f, 0.0f, 0.0f);
+            PrimitiveRenderer::drawBoxWired(red, 0.5f, 0.25f); 
+            
+            glTranslatef(centerOfRotation.x, 0.0f, 0.0f); // 3. 다시 원점으로 돌려 놓는다. 
+            glRotatef(45.0f, 0.0f, 0.0f, 1.0);  // 2. 원점에 대해서 회전 한다. 
+            glTranslatef(-centerOfRotation.x, 0.0f, 0.0f); // 1. 원점을 이동시킨다. 
+            PrimitiveRenderer::drawBoxWired(blue, 0.5f, 0.25f); //
+            PrimitiveRenderer::drawMyPoint(black, centerOfRotation, 5.0f); //원점 
+        } 
+        // glPopMatrix(); 
+    }
+    //스케일링 활용하기 
+    else if(mode ==2){
+
+
+        glLineWidth(static_cast<float>(3)); 
+        // glScalef(2.0f, 2.5f, 0.0f); //정사각형 박스를 x 방향으로 2배, y방향으로 2.5배 키운다. 
+        
+        glRotatef(curAngle, 0.0f, 0.0f, 1.0f);  //3 스케일이 적용된 상태에서 회전을 한다. 
+        glTranslatef(0.5f,0.0f, 0.0f ); 
+        glRotatef(curAngle, 0.0f, 0.0f, 1.0f);  //3 스케일이 적용된 상태에서 회전을 한다. 
+        glScalef(2.0f, 0.25f, 1.0f); //2. 스케일을 적용한다. 
+        PrimitiveRenderer::drawBoxWired(gold, 0.5f, 0.5f); //1. 박스를 그린다. 
+        
+    }
+    
+}
+
+void PrimtiveMyGallery:: update(const float& dt) {
+    MyRGB red(255, 0, 0); 
+    MyRGB blue(0,0,255); 
+    MyRGB green(0, 255, 0);
+    MyRGB olive(128, 128, 0); 
+    MyRGB gold(255, 223, 0); 
+    MyRGB black(0, 0, 0); 
+
+    glLineWidth(static_cast<float>(3)); 
+
+    glPushMatrix(); 
+    {   
+        //속이빈 삼각형 -- 수식이 바른 .. 
+        glTranslatef(-1.0f, 0.5f, 0.0f);  
+        PrimitiveRenderer::drawTriangleWired(red, 0.25f); 
+        
+        //채워진 삼각형 -- 오류 수식으로 삼각형이 약간더 크다. 
+        glTranslatef(0.5f, 0.0f, 0.0f);  
+        PrimitiveRenderer::drawTriangleFilled(blue, 0.25f); 
+
+        //속빈 사각형. 
+        glTranslatef(0.5f, 0.0f, 0.0f);  
+        PrimitiveRenderer::drawSquareWired(blue, 0.3f); 
+
+        //채워진 사각형. 
+        glTranslatef(0.5f, 0.0f, 0.0f); 
+        PrimitiveRenderer::drawSquareFilled(red, 0.25f); 
+        
+        //채워진 직 사각형. 
+        glTranslatef(0.5f, 0.0f, 0.0f); 
+        PrimitiveRenderer::drawBoxFilled(green, 0.2f, 0.3f); 
+        
+        //교차하는 선. 
+        glTranslatef(-2.0f, -0.5f, 0.0f); //다음번 줄은 이렇게 설정함. 
+        PrimitiveRenderer::drawMyLine(olive, myVec(-0.1f, -0.1f, 0.0f), olive, myVec(0.1f, 0.1f, 0.0f)); 
+        PrimitiveRenderer::drawMyLine(blue, myVec(0.1f, -0.1f, 0.0f), blue, myVec(-0.1f, 0.1f, 0.0f)); 
+
+        //속빈 오각형. 
+        glTranslatef(0.5f, 0.0f, 0.0f);
+        PrimitiveRenderer::drawPentagonWired(red, 0.18f); 
+        
+        //채워진 오각형
+        glTranslatef(0.5f, 0.0f, 0.0f);
+        PrimitiveRenderer::drawPentagonFilled(olive, 0.18f); 
+        
+        //채워진 별. 
+        glTranslatef(0.5f, 0.0f, 0.0f);
+        PrimitiveRenderer::drawStarFilled(gold, 0.2f, 0.12f); 
+        
+        //속이 빈 원.
+        glTranslatef(0.5f, 0.0f, 0.0f);
+        PrimitiveRenderer::drawCircleWired(red, 0.15f);
+        
+        //삼각형
+        glTranslatef(-2.0f, -0.5f, 0.0f); 
+        PrimitiveRenderer::drawRegularConvexPolygonWired(olive, 0.18f, 0.0f, 3); 
+        
+        //오각형. 
+        glTranslatef(0.5f, 0.0f, 0.0f);
+        PrimitiveRenderer::drawRegularConvexPolygonWired(red, 0.18f, 0.0f, 5); 
+
+        //7각형 
+        glTranslatef(0.5f, 0.0f, 0.0f);
+        PrimitiveRenderer::drawRegularConvexPolygonWired(red, 0.18f, 0.0f, 7); 
+        
+        //8각형 
+        glTranslatef(0.5f, 0.0f, 0.0f);
+        PrimitiveRenderer::drawRegularConvexPolygonWired(red, 0.18f, 0.0f, 8); 
+        
+
+        glTranslatef(0.5f, 0.0f, 0.0f);
+        //const 선언이 않되면 안되나? ??? 
+        PrimitiveRenderer::drawTriangleWired(black, myVec(-0.15f, -0.15f, 0.0f), myVec(0.15f, -0.15f, 0.0f), myVec(0.1f, 0.15f, 0.0f)); 
+        PrimitiveRenderer::drawTriangleFilled(red, myVec(-0.15f, -0.15f, 0.0f), myVec(0.15f, -0.15f, 0.0f), myVec(0.1f, 0.15f, 0.0f)); 
+
+    }
+    glPopMatrix(); 
+
+} 

@@ -1,0 +1,3 @@
+/home/hotphotatos/cNcppGameDev/tankBattleGame/build/CMakeFiles/TankGame.dir
+/home/hotphotatos/cNcppGameDev/tankBattleGame/build/CMakeFiles/edit_cache.dir
+/home/hotphotatos/cNcppGameDev/tankBattleGame/build/CMakeFiles/rebuild_cache.dir

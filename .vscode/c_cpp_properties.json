@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "MinGW64",
+            "includePath": [
+                "${workspaceFolder}/",
+                "/usr/include/**",
+                // "${workspaceFolder}/lib",
+                "${workspaceFolder}/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,66 @@
+1.20 장애물과 탱크의 충돌검사 본격 까지 
+
+< 기본 좌표와 크기> 
+obs_pos :  0.0 0.5 0.0 opb_size :0.2 0.3 0 
+
+//기본좌표로 부터 크기 값의 (*0.5f 나 / 2.0f) 절반을 계산에서 중심 좌표로 부터 leftBottom 과 rightTop값을 산출. 
+obsLeft : -0.1  osbRight: 0.1 obsBottom: 0.35 obsTop: 0.65
+
+//타킷인 tank의 좌표도 크기로 부터 왼쪽바닥과 위쪽상단의 좌표 얻어옴. 
+targetPos: -1.0, 0.0, 0.0 target_size: 0.25, 0.1, 0.0 
+
+targetLeft: -1.125 targetRight: -0.875 targetBottom: -0.05 targetTop: 0.05
+
+<< 현재 장애물 위치>>  
+obsLeftBottom  obsRihgtTop
+(-0.1, 0.35 )   (0.1f, 0.65f )
+
+<<현재 탱크의 위치>> 
+targetleftBottom  targetRightTop 
+(-1.125, -0.05)
+
+(obsRight > targetLeft && obsLeft < targetRight) && 
+ 0.1           -1.125  
+ --> << x 좌표 충돌검사 >>
+ 장애물의 오른쪽이 탱크의 왼쪽 보다 크다면 충돌(안으로 들어와 있다면.) --> 반대로 
+ (탱크가 장애물의 오른쪽에 있는 경우. )     
+                            -0.1        -0.875  
+                      --> 장애물의 왼쪽 좌표보다 탱크의 오른쪽 보다 큰경우.(탱크가 왼쪽방향에서 장애물 안쪽으로 들어옴)        
+
+--> << y 좌표 충돌검사  >> 
+(obsTop > targetBottom && obsBottom < targetTop);                      
+0.65         -0.05   
+--> 장애물의 상단이 탱크의 하단 보다 큰( 탱크가 위쪽에서 장애물 안쪽으로 들어옴. )     
+                            0.35        0.05     
+                            --> 장애물의 바닥보다 탱크의 상단이 더 크다. (탱크가 아래서 위쪽으로 들어옴)
+
+tankGame :: update .  bullet pos --> -0.743715 0.89 0
+ LR -> -1.23333 1.23333 0 limitUD -> -0.95 0.84 0
+
+
+Starting build...
+cmd /c chcp 65001>nul && C:\msys64\mingw64\bin\g++.exe -fdiagnostics-color=always -g -ID:\cNcppGame/include 
+D:\cNcppGame/test.cpp D:\cNcppGame/source/*.cpp -LD:\cNcppGame/lib -lglew32 -lglfw3 -lopengl32 -lgdi32 -luser32 -lshell32 
+-lkernel32 -static-libgcc -static-libstdc++ -o D:\cNcppGame\test.exe
+C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: 
+C:\Users\redfu\AppData\Local\Temp\ccR3gsKy.o: in function `MyVector<float>::~MyVector()':
+
+D:/cNcppGame/include/IsoMetricView.hpp:11: multiple definition of `IsoMetricHelper::worldToIso(float, float)'; 
+C:\Users\redfu\AppData\Local\Temp\ccBb1rVH.o:D:/cNcppGame/include/IsoMetricView.hpp:11: first defined here
+C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\redfu\AppData\Local\Temp\ccR3gsKy.o: in function `MyRGB::MyRGB(int, int, int)':
+D:/cNcppGame/include/IsoMetricView.hpp:19: multiple definition of `IsoMetricHelper::isoToWorld(float, float)'; C:\Users\redfu\AppData\Local\Temp\ccBb1rVH.o:D:/cNcppGame/include/IsoMetricView.hpp:19: first defined here
+C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\redfu\AppData\Local\Temp\ccohK4sV.o: in function `MyVector<float>::~MyVector()':
+D:/cNcppGame/include/IsoMetricView.hpp:11: multiple definition of `IsoMetricHelper::worldToIso(float, float)'; C:\Users\redfu\AppData\Local\Temp\ccBb1rVH.o:D:/cNcppGame/include/IsoMetricView.hpp:11: first defined here
+C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\redfu\AppData\Local\Temp\ccohK4sV.o: in function `MyRGB::MyRGB(int, int, int)':
+D:/cNcppGame/include/IsoMetricView.hpp:19: multiple definition of `IsoMetricHelper::isoToWorld(float, float)'; C:\Users\redfu\AppData\Local\Temp\ccBb1rVH.o:D:/cNcppGame/include/IsoMetricView.hpp:19: first defined here
+C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\redfu\AppData\Local\Temp\cc08Qko7.o: in function `std::__new_allocator<char>::__new_allocator(std::__new_allocator<char> const&)':
+D:/cNcppGame/include/IsoMetricView.hpp:11: multiple definition of `IsoMetricHelper::worldToIso(float, float)'; C:\Users\redfu\AppData\Local\Temp\ccBb1rVH.o:D:/cNcppGame/include/IsoMetricView.hpp:11: first defined here
+C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\redfu\AppData\Local\Temp\cc08Qko7.o: in function `operator<<(std::ostream&, MyVector<float> const&)':
+
+D:/cNcppGame/include/IsoMetricView.hpp:19: multiple definition of `IsoMetricHelper::isoToWorld(float, float)'; 
+C:\Users\redfu\AppData\Local\Temp\ccBb1rVH.o:D:/cNcppGame/include/IsoMetricView.hpp:19: first defined here
+collect2.exe: error: ld returned 1 exit status
+
+Build finished with error(s).
+
+
