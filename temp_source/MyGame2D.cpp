@@ -78,14 +78,14 @@ MyGame2D& MyGame2D::init(const std::string& title, const int& width, const int& 
     int displayWidth, displayHeight; 
     glfwGetFramebufferSize(glfwWindow, &displayWidth, &displayHeight); 
     glViewport(0,0, displayWidth, displayHeight); 
-    glMatrixMode(GL_PROJECTION); 
-    glLoadIdentity(); 
+    glMatrixMode(GL_PROJECTION); //사용못함. 
+    glLoadIdentity(); //사용못함. 
 
     float aspect_ratio= (float) displayWidth/(float)displayHeight; 
-    glOrtho(-aspect_ratio, aspect_ratio, -1.0, 1.0, -1.0, 1.0); 
+    glOrtho(-aspect_ratio, aspect_ratio, -1.0, 1.0, -1.0, 1.0); //사용못함. 
 
-    glMatrixMode(GL_MODELVIEW); //1.2 추가 
-    glLoadIdentity(); 
+    glMatrixMode(GL_MODELVIEW); //1.2 추가 //사용못함. 
+    glLoadIdentity(); //사용못함. 
 
     std::cout << "display width  "<< displayWidth << " display height " << displayHeight << std::endl;  
 
