@@ -981,3 +981,19 @@ keybingings.json 파일 편집해서 키 값 정할 수 있음. 작동방식과 
     Game2D 메인의 코드 이동. 
 
 - gemini에게 참조 코드 받아서 검토 하는 중. Game2Dref.hpp /Game2Dref.cpp     
+
+====================================================
+02.22 tankBattleGame 
+====================================================
+소스 작업 계속. 
+- 강원대 오픈지엘 코드 강의 자료 다운 -> /home/hotphotatos/cNcppGameDev/tankBattleGame/kLectureCode/firstOpenGL
+    별도경로 만들고 .gitignore에 이경로 제외하는 것으로 설정 하기.  - 설정. 
+- cmake 관련 작업해서 dependency 설정 해보기..     
+    먼저 git clone https://github.com/gabime/spdlog.git 으로 파일 받아서 설치 해보기. -- 
+    cmake .., make -j sudo make install 로 컴파일해서 /usr/bin/...아래로 인스톨. 
+    현재 프로젝트 /include/spdlog 아래로 복사해서 전체 넣어둠.   
+
+====================================================
+02.22 tankBattleGame 
+====================================================
+- cmake 와 dependencies.cmakte로 spdlog해결하려다 어려워서 그냥 컴파일 해서 복사하는 것으로. 
