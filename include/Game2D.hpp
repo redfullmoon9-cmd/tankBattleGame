@@ -3,6 +3,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -15,9 +16,16 @@ class Game2D{
         int width, height; 
         std::string title; 
         std::vector<float> color; 
+    protected:
         GLFWwindow* window=nullptr; 
-        Shader* shader=nullptr; //쉐이더   설정. 
-        unsigned int VBO, VAO; 
+        Shader* basicShader=nullptr; //쉐이더 설정. 
+        unsigned int VBO, VAO; //Vertex Buffer object, Vertext Array object 
+
+        static constexpr float vertices[]={
+            -0.5f, -0.5f, 0.0f, 
+            0.5f, -0.5f, 0.0f,  
+            0.0f, 0.5f, 0.0f  
+            }; 
 
     public:
         Game2D()=default; 
@@ -31,6 +39,8 @@ class Game2D{
 
         virtual void Update(); 
         virtual void Render(); 
+
+        Shader* getShader(){return basicShader; }
 };  
 
 #endif
