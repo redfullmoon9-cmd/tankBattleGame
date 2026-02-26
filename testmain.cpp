@@ -6,15 +6,11 @@
 #include <iostream>
 #include <cmath>
 #include "Shader.hpp"
-namespace ref{
 
+namespace ref{
     int testMain(void)
     {
-        // topView, IsoMetric view 시작시에 세팅.
-        //  TankGame tankgame("TopView");
-        //  tankgame.run();
-        //  return 0;
-        SPDLOG_INFO(" Window init"); 
+      SPDLOG_INFO(" Window init"); 
     
         if (!glfwInit())
             return -1;
@@ -33,7 +29,7 @@ namespace ref{
     
         glfwMakeContextCurrent(window);
     
-        // GLEW 초기화 대신 GLAD 초기화 사용 - 현재 Wayland 화면구성에서는 사용못함.
+        // GLEW 초기화 대신 GLAD 초기화 사용 - 현재 Wayland 화면구성에서는 glew 사용못함.
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
             std::cout << "Failed to initialize GLAD" << std::endl;
@@ -83,18 +79,14 @@ namespace ref{
     
             // 쉐이더 프로그램 사용
             ourShader.use();
-    
+            
+            // 여기에 렌더링 코드 작성
             // 저장해둔 VAO 바인드 후 그리기
             glBindVertexArray(VAO);
             glDrawArrays(GL_TRIANGLES, 0, 3);
     
             glfwSwapBuffers(window);
             glfwPollEvents();
-    
-            // 여기에 렌더링 코드 작성
-    
-            // glfwSwapBuffers(window);
-            // glfwPollEvents();
         }
         // 리소스 정리
         glDeleteVertexArrays(1, &VAO);
