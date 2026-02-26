@@ -994,6 +994,59 @@ keybingings.json 파일 편집해서 키 값 정할 수 있음. 작동방식과 
     현재 프로젝트 /include/spdlog 아래로 복사해서 전체 넣어둠.   
 
 ====================================================
-02.22 tankBattleGame 
+02.23 tankBattleGame 
 ====================================================
 - cmake 와 dependencies.cmakte로 spdlog해결하려다 어려워서 그냥 컴파일 해서 복사하는 것으로. 
+    undefined reference to `vtable for Game2D' -- virtual 함수를 선언하고 구현에서 없는 경우. vtable에러 
+    현재 Game2D.cpp에 Update(), Render() 함수 껍데기 만들면 해결. 
+
+- TankBattleGame spdlog 로 기본 정보 SPDLOG_INFO 로 로그 찍기. 
+    [main.cpp:42] openGL context version 4.6 (Core Profile) Mesa 25.3.5
+    glGetString()을 reinterpret_cast<const char*>캐스팅 하기.. -->현재값이 amd 그래픽 카드로 나옴.. nvida를 사용하지 않음... ??
+
+- include/spdlog 전체에 대해서 깃에 올리기. 
+    git status (상태확인)    
+    git add include/spdlog 
+    git status (현재 상태 다시확인)
+    git commit -m "Message" 
+    git push 
+
+====================================================
+02.24 tankBattleGame 
+====================================================
+main내에서 shader 이용하는 부분 로직 네임스페이스로 분리해서 testmain.cpp로 분리 하고 
+    -add_executable(${PROJECT_NAME} main.cpp testmain.cpp ${SOURCES})  cmake 파일에 링크를 시키도록 추가. 
+
+
+
+====================================================
+02.25 tankBattleGame 
+====================================================
+tankBattleGame  - vector 클래스와 color 클래스 마무리. 
+
+1. 모드의 c++ 참고하기 위해서  <master pdf install >
+    sudo dnf config-manager addrepo --from-repofile=http://repo.code-industry.net/rpm/master-pdf-editor.repo
+    sudo dnf install master-pdf-editor
+    master pdf  install 
+    gnome-system-monitor (시스템 모니터 gui로 켜기 - 프로세스 강제 종료 위해서)
+
+2. 세그멘테이션 오류  (코어 덤프됨) /home/hotphotatos/cNcppGameDev/tankBattleGame/build/TankBattleGame 
+    상세 내용은 GDB_DEBUG.txt 에 기록.  오류시 디버그 활용법 연습해야. 
+
+3. 오류 원인 init() 생성없이 소멸자 호출.. 
+
+====================================================
+02.26 tankBattleGame 
+====================================================
+1. 클래스의 멤버변수는 반듯이 배열의 크기를 정해야 함. 지역변수에서는 가능. c에서는 가능했지만, c++에서는 않됨. 
+    다른 방법 1)  static constexpr float vertices[] 를 사용 하거나
+     std::array<float, 9> vertieces[] 사용하는 방법.. 
+
+2, Game2D에서 일단 그려봄. -> 오류 없는데 화면에 삼각형이 나오지 안음. -->run() 함수 호출 하고 있지 않음. (바보!!!!)
+
+
+
+세가지를 보다 자세히 알고 싶어요. 1. 현재 CMakeLists.txt파일을 사용해서 cmake 하고 있어요. 그럴때  
+cmake -DCMAKE_BUILD_TYPE=Debug .. make 를 어떻게 적용해야 하나요? 아니면 직접 쉘로 가서 cmake명령을 
+실행해야 하는 건가요? 2. 코어덤프분석을 위해서 ulimit -c unlimited ./TankBattleGame 를 수행한 다음, 
+gdb ./TankBattleGame core (gdb) bt 를 수행하면 그런 파일이나 디렉토리가 없다고 나옮니다. 

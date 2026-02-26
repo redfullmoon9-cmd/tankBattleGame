@@ -2,6 +2,7 @@
 
 Shader::Shader(const char *vertexPath, const char *fragmentPath)
 {
+    SPDLOG_INFO("shader constructor"); 
     // 1 소스 코드 읽기.
     std::string vertexCode;
     std::string fragmentCode;
@@ -14,6 +15,7 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
     {
         vShaderFile.open(vertexPath);
         fShaderFile.open(fragmentPath);
+        // SPDLOG_INFO("file open success "); 
 
         std::stringstream vShaderStream, fShaderStream;
         vShaderStream << vShaderFile.rdbuf();
@@ -60,6 +62,7 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
 
 void Shader::use()
 {
+    SPDLOG_INFO("in shader use()"); 
     glUseProgram(ID);
 }
 

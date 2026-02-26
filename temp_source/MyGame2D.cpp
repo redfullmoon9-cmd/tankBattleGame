@@ -1,7 +1,7 @@
 // #include <iostream>
-#include "MyGame2D.hpp"
+#include "temp_include/MyGame2D.hpp"
 // #include "MyUtils.hpp"
-#include "Render.hpp"
+#include "temp_include/Render.hpp"
 /**
  * 원소스 Game2D.hpp cpp파일 직접 구현
  * 2025 12.29~ 12.31 * and 2026. 1.1 

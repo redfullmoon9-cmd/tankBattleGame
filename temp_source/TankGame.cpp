@@ -8,7 +8,8 @@ TankGame::TankGame() :MyGame2D("test Tank", 1024, 768, MyRGB(255, 255, 255)){
     initBoundaries(); //화면의 전체 경계 
     // initObstracles(); //장애물 큰것 2개 초기화 
     initObstracleBlocks(); //블록으로 이루어진 obstalce 초기화 
-} 
+}
+
 
 // topView 구분 
 TankGame::TankGame(std::string view):viewType(view), MyGame2D("test Tank", 1024, 768, MyRGB(255, 255, 255)){ 
