@@ -16,7 +16,7 @@ find_package(glfw3 REQUIRED)
 find_package(spdlog REQUIRED) #  spdlog
      
 # 3. 실행 파일 생성 (main.cpp가 루트에 있다면 포함, 소스 리스트 추가)
-add_executable(${PROJECT_NAME} main.cpp ${SOURCES}) 
+add_executable(${PROJECT_NAME} main.cpp testmain.cpp ${SOURCES}) 
 
 # github에서 소스 받아서 컴파일해서 실행하는 코드 
 # include(ExternalProject)
