@@ -13,19 +13,17 @@ private:
     std::string test=""; 
     tp::Vector3<float> vec3;  
     unsigned int VAO, VBO; 
-    // static constexpr float vertices[]={
-    //     -0.5f, -0.5f, 0.0f, 
-    //     0.5f, -0.5f, 0.0f,  
-    //     0.0f, 0.5f, 0.0f  
-    // }; 
+
 public:
     TankGame( ); 
     TankGame(const std::string& title, const int& width, const int& height, std::vector<float> color ); 
     ~TankGame( ); 
-    void Update() override; 
-    void Render() override; 
-    // static const size_t vertexCount=9; 
-    // static const float* getVertices() { return vertices; }
+    static const size_t vertexCount=9; 
+    static const float* getVertices() { return vertices; }
+
+protected: //왜??
+    void OnInit() override;  //Template Method Pattern. 
+    void OnRender() override; //Template Method Pattern. 
 }; 
 
 #endif 
