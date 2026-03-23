@@ -5,6 +5,7 @@
 #include "Tank.hpp"
 #include <spdlog/spdlog.h>
 #include "MyVector.hpp"
+
 /** tank controller class  */
 
 class TankGame : public Game2D{
@@ -19,7 +20,7 @@ public:
     TankGame(const std::string& title, const int& width, const int& height, std::vector<float> color ); 
     ~TankGame( ); 
     static const size_t vertexCount=9; 
-    static const float* getVertices() { return vertices; }
+    // static const float* getVertices() { return vertices; }
 
 protected: //왜??
     void OnInit() override;  //Template Method Pattern. 

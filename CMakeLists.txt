@@ -13,16 +13,14 @@ file(GLOB_RECURSE SOURCES "source/*.cpp" "source/*.c")
 find_package(OpenGL REQUIRED)
 # find_package(GLEW REQUIRED) 제거 
 find_package(glfw3 REQUIRED)
-find_package(spdlog REQUIRED) #  spdlog
-     
+# find_package(spdlog REQUIRED) #  spdlog 로컬에 받아서 서브 모듈방식으로 사용하기.  
+
+# 방법 A: 소스를 직접 포함 (가장 빠름)
+set(SPDLOG_BUILD_ALL OFF) 
+add_subdirectory(external/spdlog)
+
 # 3. 실행 파일 생성 (main.cpp가 루트에 있다면 포함, 소스 리스트 추가)
 add_executable(${PROJECT_NAME} main.cpp testmain.cpp ${SOURCES}) 
-
-# github에서 소스 받아서 컴파일해서 실행하는 코드 
-# include(ExternalProject)
-# set(DEP_INSTALL_DIR ${PROJECT_BINARY_DIR}/install)
-# set(DEP_INCLUDE_DIR, ${DEP_INSTALL_DIR}/include)
-# set(DEP_LIB_DIR, ${DEP_INSTALL_DIR}/lib)
 
 # 4. include 폴더 경로를 컴파일러에게 알려주기 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
