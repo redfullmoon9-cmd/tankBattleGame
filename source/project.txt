@@ -326,7 +326,7 @@ class PrimitiveMyGallery 작성하고
 
 ====================================================
 1.8 홍정모의 게임팩 강의 소스 분석 
---> MyGame2D 클래스 작성및 수정.  PrimtiveMyGallery class 작성. 
+--> MyGame2D 클래스 작성및 수정.  PrimitiveMyGallery class 작성. 
 ====================================================
 
 
@@ -353,7 +353,7 @@ include - 각종 *.hpp
           \GL 라이브러리
           \GLFW 라이브러리
 
-source - 각종 *.cpp 파일 *.d 파일        
+source - 각종 *.cpp 파일 *.c 파일        
 lib    - glew32.lib
          libflfw3.a      
 
@@ -865,7 +865,7 @@ isoMetric 관련 draw 함수들을 별도로 관리하는 것은 코드의 구�
 02.10 keyBoard 이벤트 변경. --> inputManager 
 ====================================================
 - inputManager 변경 실패하고 Game2D 에서 isKeyPress 등의 키보드 이벤트 사용하도록 함. 
-- 현재 topVeiw 작동함. 장애물은 그냥 통과, 포탄이 날아가면 장애물 손상은 당하고 있음. 
+- 현재 topVeiw 작동함. 장애물은 그냥 통과, 포탄이 날아가면 장애물 손상 되고 있음. 
 
 
 ====================================================
@@ -928,13 +928,15 @@ shader 방식으로 구성된 예제 파일 테스트 하고 각 VBO
 ====================================================
 02.19 tankBattleGame -키보드 설정문제... 
 ====================================================
+이전 코드 자동하지 않은 문제.. -->리눅스에서 화면 변경, 현재 코드 방식은  Wayland에 지원 않함. 
+삽질 시작. 
 현재 화면 모드 설정알아보기. - 환경 변수를 확인 하거나 GNOME세선 정보를 확인.  
 echo $XDG_SESSION_TYPE --> wayland 
 echo $WAYLAND_DISPLAY ---> wayland-0
 
 learn openGL Graphic programming reading  
 
-현재 키보드 문제 부터 해결해야 할듯 - 프로파일작성. 
+현재 vscode 핫키가 다르다. 핫키 설정 문제 부터 해결해야 할듯 - 프로파일작성. 
 - 특정환경에서(C++ , python ) 설정하고 키값 사용되도록 정함.
 - Profile은 다음을 독립적으로 가집니다:
     keybindings.json / settings.json / extensions /UI layout
@@ -1045,8 +1047,44 @@ tankBattleGame  - vector 클래스와 color 클래스 마무리.
 2, Game2D에서 일단 그려봄. -> 오류 없는데 화면에 삼각형이 나오지 안음. -->run() 함수 호출 하고 있지 않음. (바보!!!!)
 
 
+====================================================
+02.27 tankBattleGame 
+====================================================
+1. 깃허브 수정. 
+2. tankGame으로 컨트롤 이동. 원래 구성은 game2D 클래스에서 openGL 함수 초기화(init), 실행(run) 하는 것에서 
+    그것의 드라이브드 클래스인 tankGame클래스 에서 구체적인 구현부분이 초기화되고 수행되는 방식으로 
 
-세가지를 보다 자세히 알고 싶어요. 1. 현재 CMakeLists.txt파일을 사용해서 cmake 하고 있어요. 그럴때  
-cmake -DCMAKE_BUILD_TYPE=Debug .. make 를 어떻게 적용해야 하나요? 아니면 직접 쉘로 가서 cmake명령을 
-실행해야 하는 건가요? 2. 코어덤프분석을 위해서 ulimit -c unlimited ./TankBattleGame 를 수행한 다음, 
-gdb ./TankBattleGame core (gdb) bt 를 수행하면 그런 파일이나 디렉토리가 없다고 나옮니다. 
+3. 강의 OpenGL course 03-01： 그래픽스 파이프라인  
+
+
+
+깃 허브로 필요한 자료 업데이트 자료 불필요한 자료 올라 간것 지움. 
+game2d에서 그리는 부분 tankGame으로 이전 -- 코어 덤프 계속 생김. .. 왜??? openGL 리소스를 얻는 문제와 객체 생성 싯점의 문제가 꼬임. . 
+
+-->설계 문제 봉착... 이 문제는 OpenGL 엔진 구조에서 매우 중요한 "OpenGL context lifetime vs 객체 생성 시점" 
+결론... -->OpenGL resource 생성은 constructor에서 하면 안 됩니다.
+    glfwCreateWindow()
+    glfwMakeContextCurrent()
+    gladLoadGL()  
+
+위의 리소스들이 모두 초기화 된 이후에 해야. 올바른 설계 패턴 (권장 구조) 정답은 2-phase initialization입니다.
+constructor에서는 OpenGL 호출 금지,  별도의 init() 또는 onInit() 사용해서 하위 클래스에 위임 해야함. 
+여기서 템플릿의 의미는 기본적 알고리즘은 상위 클래스가 하되, 세부 구현은 하위 클래스가 하도록 하는 의미의 템플릿. 
+
+그래서 ---> 가장 권장하는 구조 (Template Method Pattern) Game2D가 init() 내부에서 virtual 함수를 호출하도록 설계
+
+game2d destructor은 왜 버추얼로? -- 상위 클래스와 하위 클래스 모두 호출해서, 특히 하위 클래스에서 자원해제. 
+vertices[] 배열을 왜 cpp로??  hpp에는 않되나? -- header를 인클루드 하는 모든 파일에 포함됨..따라서 자원의 효율적 사용 않됨. 
+    더불어 duplicated symbol 위험이 생김. 
+
+보통 끝에 언바인드 사용하는 이유? - 결론 안해도 됨..  glBindBuffer(GL_ARRAY_BUFFER, 0);  glBindVertexArray(0);  하지 않은 이유??
+
+testmain.cpp 변경해서 glfwcallback 펑션 테스트. 
+
+
+====================================================
+26. 03.6 tankBattleGame 
+====================================================
+
+- shader클래스 다시 분석하면서 CppGraphicTest프로젝트와 구현 방식 비교 분석. 
+- 이전 강원대 오픈지엘 참조 코드 삭제. 
