@@ -71,7 +71,7 @@ void Shader::use()
     glUseProgram(ID);
 }
 
-/**id와 이름을 통해서 해당 변수의 이치를 찾고 이를 glUmiform1i로 전딜해서 값을 변경함. 
+/**id와 이름을 통해서 해당 변수의 위치를 찾고 이를 glUmiform1i로 전딜해서 값을 변경함. 
  * 그래픽 카드에 변수의 변경값을 전달함. setBool값을 통해 0, 1 값을 보냄. 
 */
 void Shader::setBool(const std::string &name, bool value) const

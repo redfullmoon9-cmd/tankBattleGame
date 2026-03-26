@@ -11,7 +11,9 @@ std::unique_ptr<KShader> KShader::CreateFromFile(const std::string fileName, GLe
 KShader::~KShader()
 {
     if(m_shader) glDeleteShader(m_shader); 
+    // if(m_program)
 }
+
 
 bool KShader::loadFile(const std::string fileName, GLenum shaderType)
 {
@@ -34,8 +36,22 @@ bool KShader::loadFile(const std::string fileName, GLenum shaderType)
         glGetShaderInfoLog(m_shader, 1024, nullptr, infolog); 
         SPDLOG_ERROR("faile to compiled error: {}",fileName); 
         SPDLOG_ERROR("reason: {}",infolog); 
+        return false;
 
     }
 
-    return false;
+    return true;
+}
+
+std::optional<std::string> KShader::loadTextFile(const std::string fileName)
+{
+    // SPDLOG_INFO("LoadTextFile {}", fileName); 
+    std::ifstream fin(fileName); 
+    if(!fin.is_open()){
+        SPDLOG_INFO("failed to open file {}", fileName); 
+        return {}; 
+    }
+    std::stringstream text; 
+    text << fin.rdbuf(); 
+    return text.str(); 
 }

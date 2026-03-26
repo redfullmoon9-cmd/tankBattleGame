@@ -11,7 +11,6 @@ file(GLOB_RECURSE SOURCES "source/*.cpp" "source/*.c")
    
 # 2. 패키지 찾기 
 find_package(OpenGL REQUIRED)
-# find_package(GLEW REQUIRED) 제거 
 find_package(glfw3 REQUIRED)
 # find_package(spdlog REQUIRED) #  spdlog 로컬에 받아서 서브 모듈방식으로 사용하기.  
 

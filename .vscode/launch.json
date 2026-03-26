@@ -5,7 +5,6 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            // CMakeLists.txt에서 project(TankBattleGame)으로 되어 있으니 출력 파일명 확인
             "program": "${workspaceFolder}/build/TankBattleGame",
             "args": [],
             "stopAtEntry": false,
@@ -20,7 +19,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "CMake: build" // tasks.json의 label과 일치해야 함
+            "preLaunchTask": "CMake: build" 
         }
     ]
 }

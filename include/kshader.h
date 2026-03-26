@@ -3,6 +3,8 @@
 
 
 #include <memory>
+#include <fstream>
+#include <sstream>
 #include <glad/glad.h>
 #include <string>
 #include <optional>
@@ -17,7 +19,8 @@ private:
     KShader(){}
     bool loadFile(const std::string fileName, GLenum shaderType); 
     std::optional<std::string> loadTextFile(const std::string fileName); 
-    uint32_t m_shader { 0 }; 
+    uint32_t m_shader { 0 }; //쉐이더 아이디.
+    uint32_t m_program {0 }; // 프로그램 아이디. 
 
 };
 

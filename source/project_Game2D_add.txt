@@ -56,3 +56,5 @@ MyGame2D 클래스를 Modern하게 유지하려면 다음과 같이 구조를 �
 변환,       "glOrtho, glTranslate, glRotate",               삭제,GLM 행렬 연산으로 대체
 상태,       "glClear, glClearColor, glViewport",            유지,그대로 사용
 
+
+
