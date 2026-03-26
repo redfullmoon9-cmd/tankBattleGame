@@ -24,14 +24,6 @@ TankGame::~TankGame(){
 
 void TankGame::OnInit()
 {
-     /*
-    ***********
-     * 아래 이하.game2D에서 옮겨옴 설계 issue로 다시 옮겨옴. 초기화 문제 잇슈로 익셉션 .. 설계 방식 변경. 
-     * template Method pattern. 
-     * ************
-     */
-
-    //exception 
     glGenVertexArrays(1, &VAO); //향후 -->tank로 
     glGenBuffers(1, &VBO); //향후 -->tank로 
 
@@ -46,22 +38,21 @@ void TankGame::OnInit()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3* sizeof(float), (void*)0); //이 싯점이후 VBO가 VAO에 저장된다. 
     glEnableVertexAttribArray(0); 
 
-     //언바인드. ??-- 필수 아님. 
-    // glBindBuffer(GL_ARRAY_BUFFER, 0); 
-    // glBindVertexArray(0); //사용해도 되기는 하나 
-    /* 여기 까지  */
-
 }
 
+//실제로 그림은 이곳에서 그려짐. 
 void TankGame::OnRender()
-{ //Template Method Pattern 
-     if(basicShader){
-        basicShader->use(); //쉐이더 사용
-        glBindVertexArray(VBO);  // 그릴 데이터 바인딩. 
-        glDrawArrays(GL_TRIANGLES, 0, 3); //그리기 실행. 
+{ 
+    //Template Method Pattern 
+    // if(basicShader){
+        // basicShader->use(); //쉐이더 사용
+    // }
+    //쉐이더 변경.-refactoring  
+    m_programPtr->Use(); 
+    glBindVertexArray(VBO);  // 그릴 데이터 바인딩. 
+    glDrawArrays(GL_TRIANGLES, 0, 3); //그리기 실행. 
 
-        glBindVertexArray(0); // 4. 해제 -- 엔진 스타일로 
-    }
+    glBindVertexArray(0); // 4. 해제 -- 엔진 스타일로 
     // Game2D::Render(); 
 
 }

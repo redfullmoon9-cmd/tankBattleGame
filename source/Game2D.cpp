@@ -10,7 +10,7 @@ Game2D::Game2D(const std::string &_title, const int &_width, const int &_height,
 Game2D::~Game2D()
 {
     if(window){
-        if(basicShader) delete basicShader; 
+        if(m_shader) glDeleteShader(m_shader); 
         glfwDestroyWindow(window); 
     }
     glfwTerminate(); 
@@ -71,8 +71,13 @@ Game2D &Game2D::init(const std::string &title, const int &width, const int &heig
     OnInit(); //하위 클래스 openGL init 호출 하는 구조. 
     
     //shaders경로에 있는 버택스와 프래그먼트 정보. 
-    basicShader = new Shader("shaders/vertex_shader.vs", "shaders/fragment_shader.fs"); 
-    SPDLOG_INFO( "Shader create :{}", (basicShader ? "OK " :"FAIL")); 
+    // basicShader = new Shader("shaders/vertex_shader.vs", "shaders/fragment_shader.fs"); 
+    m_vertexShaderPtr =KShader::CreateFromFile("shaders/vertex_shader.vs", GL_VERTEX_SHADER); 
+    m_fragmentShaderPtr=KShader::CreateFromFile("shaders/fragment_shader.fs", GL_FRAGMENT_SHADER);  
+
+    m_programPtr =KProgram::CreateProgram({m_vertexShaderPtr, m_fragmentShaderPtr}); 
+
+
 
     // VAO, VBO 관련 openGL함수들 이동 --> tankGame으로 
     

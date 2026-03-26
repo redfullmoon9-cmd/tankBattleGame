@@ -7,8 +7,12 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <memory>
 #include "MyVector.hpp"
-#include "Shader.hpp"
+#include "kshader.h"
+#include "kprogram.h"
+// #include "Shader.hpp"
+
 
 /**26.02. 21 add */
 class Game2D{
@@ -18,7 +22,12 @@ class Game2D{
         std::vector<float> color; 
     protected:
         GLFWwindow* window=nullptr; 
-        Shader* basicShader=nullptr; //쉐이더 설정. 
+        // Shader* basicShader=nullptr; //쉐이더 설정. 
+        uint32_t m_shader{0}; 
+        uint32_t m_program{0}; 
+        std::unique_ptr<KProgram> m_programPtr=nullptr; 
+        std::shared_ptr<KShader>  m_vertexShaderPtr=nullptr; 
+        std::shared_ptr<KShader>  m_fragmentShaderPtr=nullptr; 
 
         virtual void OnInit(); //Template method pattern 구현.  
         virtual void OnRender(); //Template method pattern 구현.        
@@ -33,7 +42,8 @@ class Game2D{
         Game2D& run(); 
         void reportError(const std::string& functionName, const std::string& message); 
 
-        Shader* getShader(){return basicShader; }
+        // Shader* getShader(){return basicShader; }
+        // std::unique_ptr<KShader> getShader() { return m_shaderPtr; }
 };  
 
 #endif
