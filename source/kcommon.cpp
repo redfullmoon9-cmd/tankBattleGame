@@ -1,9 +1,9 @@
 
 #include "kcommon.h"
 
-std::optional<std::string> loadTextFile(const std::string fileName)
+std::optional<std::string> loadTextFile(const std::string& fileName)
 {
-    // SPDLOG_INFO("LoadTextFile {}", fileName); 
+    SPDLOG_INFO("LoadTextFile {}", fileName); 
     std::ifstream fin(fileName); 
     if(!fin.is_open()){
         SPDLOG_INFO("failed to open file {}", fileName); 

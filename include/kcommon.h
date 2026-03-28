@@ -10,6 +10,6 @@
 #include <string>
 #include <optional>
 
-std::optional<std::string> loadTextFile(const std::string fileName); 
+std::optional<std::string> loadTextFile(const std::string& fileName); 
 
 #endif //__KCOMMON_H__

@@ -6,7 +6,7 @@ namespace ref{
 }
 
 int main(){
-    unsigned int mode =2; 
+    unsigned int mode =1; 
     //이전 shader변경  testMain으로 변경해서 namespace관리. 
     if(mode == 1){
         return ref::testMain(); 

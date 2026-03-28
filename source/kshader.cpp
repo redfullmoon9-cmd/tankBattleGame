@@ -1,6 +1,6 @@
 #include "kshader.h"
 
-std::unique_ptr<KShader> KShader::CreateFromFile(const std::string fileName, GLenum shaderType)
+std::unique_ptr<KShader> KShader::CreateFromFile(const std::string& fileName, GLenum shaderType)
 {
     auto shader=std::unique_ptr<KShader> (new KShader()); 
     if(!shader -> loadFile(fileName, shaderType)) return nullptr; 
@@ -15,7 +15,7 @@ KShader::~KShader()
 }
 
 
-bool KShader::loadFile(const std::string fileName, GLenum shaderType)
+bool KShader::loadFile(const std::string& fileName, GLenum shaderType)
 {
     auto result = loadTextFile(fileName); 
     if(!result.has_value()) return false; 
@@ -37,21 +37,9 @@ bool KShader::loadFile(const std::string fileName, GLenum shaderType)
         SPDLOG_ERROR("faile to compiled error: {}",fileName); 
         SPDLOG_ERROR("reason: {}",infolog); 
         return false;
-
     }
 
     return true;
 }
 
-std::optional<std::string> KShader::loadTextFile(const std::string fileName)
-{
-    // SPDLOG_INFO("LoadTextFile {}", fileName); 
-    std::ifstream fin(fileName); 
-    if(!fin.is_open()){
-        SPDLOG_INFO("failed to open file {}", fileName); 
-        return {}; 
-    }
-    std::stringstream text; 
-    text << fin.rdbuf(); 
-    return text.str(); 
-}
+
