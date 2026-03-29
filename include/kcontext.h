@@ -9,7 +9,7 @@
 
 class KContext{
 public:
-    static std::unique_ptr<KContext> CreateContext(); 
+    static std::unique_ptr<KContext> CreateContext(uint32_t mode); 
     void Render(); 
     void RenderRef(); //삼각형그리기 참조용 소스 
     ~KContext(); 

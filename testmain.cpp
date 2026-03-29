@@ -61,14 +61,17 @@ namespace ref{
 
         // const GLubyte* glGetString(GLenum name) 반환된 타입은 unsigned char  
         // 현재의 반환타입을 주소는 그대로 두고 signed char로 변환 하기 위해서 포인터를 타입캐스팅. 
-        auto glVersion=reinterpret_cast<const char*>(glGetString(GL_VERSION)); 
-        SPDLOG_INFO("openGL context version {}",  glVersion); 
-        auto glVender =reinterpret_cast<const char*>(glGetString(GL_VENDOR)); 
-        SPDLOG_INFO("openGL vender {}",  glVender); 
-        auto glShader = reinterpret_cast<const char*>(glGetString(GL_RENDERER)); 
-        SPDLOG_INFO("openGL shader {}", glShader); 
+        // auto glVersion=reinterpret_cast<const char*>(glGetString(GL_VERSION)); 
+        // SPDLOG_INFO("openGL context version {}",  glVersion); 
+        // auto glVender =reinterpret_cast<const char*>(glGetString(GL_VENDOR)); 
+        // SPDLOG_INFO("openGL vender {}",  glVender); 
+        // auto glShader = reinterpret_cast<const char*>(glGetString(GL_RENDERER)); 
+        // SPDLOG_INFO("openGL shader {}", glShader); 
 
-        auto context =KContext::CreateContext(); 
+
+        //1: 삼각형 2: 사각형. 
+        uint32_t mode =1; 
+        auto context =KContext::CreateContext(mode); 
         if(!context){
             SPDLOG_INFO("failed to create context "); 
             glfwTerminate(); 
@@ -83,7 +86,12 @@ namespace ref{
         while (!glfwWindowShouldClose(window))
         {
             // 여기에 렌더링 코드 작성
-            context->Render(); 
+            if(mode ==1) { //삼각형 그리기 
+                context->RenderRef(); 
+            }
+            else if(mode ==2 ) { //사각형 그리기 
+                context->Render();  
+            }
             //프론트 버퍼와 백버퍼를 바뀌치는 방식으로 그린다. 더블 버퍼링방식, 부드러운 화면이 가능.  
             glfwSwapBuffers(window); 
             glfwPollEvents();
