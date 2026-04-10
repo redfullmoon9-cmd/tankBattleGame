@@ -68,29 +68,35 @@ namespace ref{
         // auto glShader = reinterpret_cast<const char*>(glGetString(GL_RENDERER)); 
         // SPDLOG_INFO("openGL shader {}", glShader); 
 
+        //callback fuction 추가. 
+        OnFrameBuffersizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT); 
+        glfwSetFramebufferSizeCallback(window, OnFrameBuffersizeChange); 
+        glfwSetKeyCallback(window, OnKeyEvent);
 
-        //1: 삼각형 2: 사각형. 
-        uint32_t mode =1; 
+        //1: 삼각형 2: 사각형. 3.리펙토링 이후의 사각형.  
+        uint32_t mode =3; 
+
+        SPDLOG_INFO(" after refactoring, draw rectangle   mode = {} ", mode); 
         auto context =KContext::CreateContext(mode); 
         if(!context){
             SPDLOG_INFO("failed to create context "); 
             glfwTerminate(); 
             return -1; 
         }
-
-        //callback fuction 추가. 
-        OnFrameBuffersizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT); 
-        glfwSetFramebufferSizeCallback(window, OnFrameBuffersizeChange); 
-        glfwSetKeyCallback(window, OnKeyEvent);
         
         while (!glfwWindowShouldClose(window))
         {
             // 여기에 렌더링 코드 작성
             if(mode ==1) { //삼각형 그리기 
-                context->RenderRef(); 
+                context->RenderRef();
+
+            }else if(mode == 2){
+                context->RenderRef2(); 
+                
             }
-            else if(mode ==2 ) { //사각형 그리기 
+            else if(mode ==3 ) { //refactoring 사각형 그리기 
                 context->Render();  
+                // context->RenderRef3(); //쉐이더 파일을 이용한 색상변화 
             }
             //프론트 버퍼와 백버퍼를 바뀌치는 방식으로 그린다. 더블 버퍼링방식, 부드러운 화면이 가능.  
             glfwSwapBuffers(window); 
