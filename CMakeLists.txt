@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(OpenGL_GL_PREFERENCE GLVND)
 
 # 1. 소스 파일들을 리스트로 만들기 (source 폴더 내의 모든 cpp)
-# file(GLOB_RECURSE SOURCES "source/*.cpp") //glad 추가 이후 설정. 
 file(GLOB_RECURSE SOURCES "source/*.cpp" "source/*.c")
    
 # 2. 패키지 찾기 
@@ -22,10 +21,14 @@ add_subdirectory(external/spdlog)
 add_executable(${PROJECT_NAME} main.cpp testmain.cpp ${SOURCES}) 
 
 # 4. include 폴더 경로를 컴파일러에게 알려주기 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    # ${CMAKE_CURRENT_SOURCE_DIR}/include/stb
+)
 
 # 5. 라이브러리 연결
 # target_link_libraries(TankGame OpenGL::GL GLEW::GLEW glfw) //glew
 target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw spdlog::spdlog)
 
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/shaders" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/resources" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")

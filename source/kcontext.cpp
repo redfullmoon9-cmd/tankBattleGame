@@ -55,7 +55,7 @@ void KContext::RenderRef2()
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //사각형 그리기. 6은 인덱스의 갯수. 
 }
 
-//60분의 1초 실행되는 애니메이션
+//60분의 1초 실행되는 애니메이션 그리기 
 void KContext::RenderRef3()
 {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -77,9 +77,10 @@ KContext::~KContext()
 
 //인덱스 버퍼를 사용해서 사각형 그리기, refactoring 된 버전 
 // 버텍스 정보에 여러가지 담기. vertices정보값이 처음은 좌표 정보, 그다음이 컬러 정보로 구성, 
+// per_vertex_color.vs fs를 이용해서 정점별로 색상이 변하는 예제 
 bool KContext::Init()
 {
-    SPDLOG_INFO(" context init  mode =3, 인덱스 버퍼를 사용해서 사각형 그리기, refactoring 된 버전"); 
+    SPDLOG_INFO(" context init  mode =3, 정점좌표와 컬러 좌표 사용해서 사각형 그리기, refactoring 된 버전"); 
 
     //사각형 정점 정의 4개만 정의 하고 아래에서 인덱스를 사용한다.
     // 처음 3개는 정점 정도, 그 나음 3개는 컬러 정보      
@@ -123,15 +124,7 @@ bool KContext::Init()
     if(!m_programPtr) return false; 
     SPDLOG_INFO(" program id {}", m_programPtr->Get()); 
 
-    //shader 파일에서 읽어온다. simple.vs 와 simple.fs
-    // simple.fs에서 uniform 변수 color 값을 읽어온다. 
-    auto loc=glGetUniformLocation(m_programPtr->Get(), "color"); 
-    m_programPtr->Use(); 
-    //위에서 얻어온  color라는 변수 값에 1.0f, 1.0f, 0.0f, 1.0f 값을 전달. 
-    glUniform4f(loc, 1.0f, 0.0f, 0.0f, 1.0f);  
-     
     glClearColor(0.0f, 0.0f, 0.2f, 0.0f); //한번만 .. 해도. 
-    // m_vertexPtr->UnBind(); 
 
     return true;
 }
@@ -337,7 +330,6 @@ bool KContext::InitRef3()
     glUniform4f(loc, 1.0f, 0.0f, 0.0f, 1.0f);  
      
     glClearColor(0.0f, 0.0f, 0.2f, 0.0f); //한번만 .. 해도. 
-    // m_vertexPtr->UnBind(); 
 
     return true;
 }
