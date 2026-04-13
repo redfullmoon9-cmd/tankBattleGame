@@ -76,7 +76,7 @@ namespace ref{
         //1: 삼각형 2: 사각형. 3.리펙토링 이후의 사각형.  
         uint32_t mode =3; 
 
-        SPDLOG_INFO(" after refactoring, draw rectangle   mode = {} ", mode); 
+        SPDLOG_INFO(" after refactoring, draw texture   mode = {} ", mode); 
         auto context =KContext::CreateContext(mode); 
         if(!context){
             SPDLOG_INFO("failed to create context "); 

@@ -1,4 +1,5 @@
 #include "kcontext.h"
+#include "kimage.h"
 
 std::unique_ptr<KContext> KContext::CreateContext(uint32_t mode)
 {
@@ -75,20 +76,18 @@ KContext::~KContext()
 
 }
 
-//인덱스 버퍼를 사용해서 사각형 그리기, refactoring 된 버전 
-// 버텍스 정보에 여러가지 담기. vertices정보값이 처음은 좌표 정보, 그다음이 컬러 정보로 구성, 
-// per_vertex_color.vs fs를 이용해서 정점별로 색상이 변하는 예제 
+
+// 텍스쳐 정보 가져와서 읽기. 정점정보에 xyx rgb값 이외에 텍스쳐 정보  
 bool KContext::Init()
 {
-    SPDLOG_INFO(" context init  mode =3, 정점좌표와 컬러 좌표 사용해서 사각형 그리기, refactoring 된 버전"); 
+    SPDLOG_INFO(" context init  mode =3, 텍스쳐 그리기"); 
 
-    //사각형 정점 정의 4개만 정의 하고 아래에서 인덱스를 사용한다.
-    // 처음 3개는 정점 정도, 그 나음 3개는 컬러 정보      
+    //정점 정보는 텍스쳐를 담기 위해서 x,y,z,r,g,b, s, t 값을 저장해야. s,t는 텍스쳐 코디네이트 
     float vertices[] = { 
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   // top right, red
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,// bottom right, green 
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.1f, // bottom left, blue 
-        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f// top left, yellow
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,  
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, 
+        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f 
     };
     // 위 정점의 인덱스를 아래 구조체에서 저장 처음 정점 0 1 3 을 사용해서 삼각형 하나를 그리고, 다음 정점 인덱스 1 2 3 으로 그림. 
     //이 사각형의 예제에서는 일레멘트(혹 인덱스 어레이 )버퍼를 사용한다. (이전의 삼각형 예에서는 어레이버퍼사용 Array Buffer)
@@ -98,20 +97,22 @@ bool KContext::Init()
     };
 
     m_vertexPtr=KVertex::CreateVertex(); 
-    m_vertexBufferPtr=KBuffer::CreateBufferWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices, sizeof(float)*24); 
+    m_vertexBufferPtr=KBuffer::CreateBufferWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices, sizeof(float)*32); 
 
 
     //vertices가 어떤 모양새로 생겼는지를 기술해 주는 부분. 
     //어트리뷰트 0을 정점, 1은 컬러값을 가져 가도록, stride, offset 값 기술
-    m_vertexPtr->setAttribute(0,3, GL_FLOAT, GL_FALSE, sizeof(float)*6, 0); 
-    m_vertexPtr->setAttribute(1,3, GL_FLOAT, GL_FALSE, sizeof(float)*6, sizeof(float)*3); 
+    //어트리뷰트 2는 텍스쳐에 관한 정보이고 텍스쳐 코디네이트는 2차원, 앞에서 6개의 정보를 뛰어 넘어야 처음 나온다. 
+    m_vertexPtr->setAttribute(0,3, GL_FLOAT, GL_FALSE, sizeof(float)*8, 0); 
+    m_vertexPtr->setAttribute(1,3, GL_FLOAT, GL_FALSE, sizeof(float)*8, sizeof(float)*3); 
+    m_vertexPtr->setAttribute(2,2, GL_FLOAT, GL_FALSE, sizeof(float)*8, sizeof(float)*6); 
     
     m_indexBufferPtr=KBuffer::CreateBufferWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(uint32_t)*6 ); 
 
     
     // 2. 쉐이더 객체 생성 - 각 파일들을 읽어 온다.
-    std::shared_ptr<KShader> vertexShader = KShader::CreateFromFile("shaders/per_vertex_color.vs", GL_VERTEX_SHADER);  
-    std::shared_ptr<KShader> fragmentShader  = KShader::CreateFromFile("shaders/per_vertex_color.fs", GL_FRAGMENT_SHADER);  
+    std::shared_ptr<KShader> vertexShader = KShader::CreateFromFile("shaders/texture.vs", GL_VERTEX_SHADER);  
+    std::shared_ptr<KShader> fragmentShader  = KShader::CreateFromFile("shaders/texture.fs", GL_FRAGMENT_SHADER);  
     
     if(!vertexShader || !fragmentShader) {
         return false; 
@@ -124,7 +125,23 @@ bool KContext::Init()
     if(!m_programPtr) return false; 
     SPDLOG_INFO(" program id {}", m_programPtr->Get()); 
 
-    glClearColor(0.0f, 0.0f, 0.2f, 0.0f); //한번만 .. 해도. 
+    glClearColor(0.0f, 0.0f, 0.2f, 0.0f); 
+
+    auto image =Kimage::load("resources/image/container.jpg");
+    if(!image) return false; 
+    SPDLOG_INFO("image {}X{}, {}channels", image->getWidth(), image->getHeight(), image->getChannelCount());  
+
+    //texture 
+    glGenTextures(1, &m_texture); 
+    glBindTexture(GL_TEXTURE_2D, m_texture); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); //모서리 컬러값을 가져다 쓰는 방식
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); 
+
+    //GPU로 복사하는 부분으로 cpu 메모리에 있는 그림의 형태를 알려준다. 
+    //interalFormat 변경. GL_RED의 경우 red channel만 복사된다. 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->getWidth(), image->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, image->getData()); 
 
     return true;
 }
@@ -334,3 +351,56 @@ bool KContext::InitRef3()
     return true;
 }
 
+//인덱스 버퍼를 사용해서 사각형 그리기, refactoring 된 버전 
+// 버텍스 정보에 여러가지 담기. vertices정보값이 처음은 좌표 정보, 그다음이 컬러 정보로 구성, 
+// per_vertex_color.vs fs를 이용해서 정점별로 색상이 변하는 예제 
+bool KContext::InitRef4()
+{
+    SPDLOG_INFO(" context init  mode =3, 정점좌표와 컬러 좌표 사용해서 사각형 그리기, refactoring 된 버전"); 
+
+    //사각형 정점 정의 4개만 정의 하고 아래에서 인덱스를 사용한다.
+    // 처음 3개는 정점 정도, 그 나음 3개는 컬러 정보      
+    float vertices[] = { 
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   // top right, red
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,// bottom right, green 
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.1f, // bottom left, blue 
+        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f// top left, yellow
+    };
+    // 위 정점의 인덱스를 아래 구조체에서 저장 처음 정점 0 1 3 을 사용해서 삼각형 하나를 그리고, 다음 정점 인덱스 1 2 3 으로 그림. 
+    //이 사각형의 예제에서는 일레멘트(혹 인덱스 어레이 )버퍼를 사용한다. (이전의 삼각형 예에서는 어레이버퍼사용 Array Buffer)
+    uint32_t indices[] = { // 삼각형 2개로 사각형을 그림
+        0, 1, 3, // first triangle
+        1, 2, 3, // second triangle
+    };
+
+    m_vertexPtr=KVertex::CreateVertex(); 
+    m_vertexBufferPtr=KBuffer::CreateBufferWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices, sizeof(float)*24); 
+
+
+    //vertices가 어떤 모양새로 생겼는지를 기술해 주는 부분. 
+    //어트리뷰트 0을 정점, 1은 컬러값을 가져 가도록, stride, offset 값 기술
+    m_vertexPtr->setAttribute(0,3, GL_FLOAT, GL_FALSE, sizeof(float)*6, 0); 
+    m_vertexPtr->setAttribute(1,3, GL_FLOAT, GL_FALSE, sizeof(float)*6, sizeof(float)*3); 
+    
+    m_indexBufferPtr=KBuffer::CreateBufferWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(uint32_t)*6 ); 
+
+    
+    // 2. 쉐이더 객체 생성 - 각 파일들을 읽어 온다.
+    std::shared_ptr<KShader> vertexShader = KShader::CreateFromFile("shaders/per_vertex_color.vs", GL_VERTEX_SHADER);  
+    std::shared_ptr<KShader> fragmentShader  = KShader::CreateFromFile("shaders/per_vertex_color.fs", GL_FRAGMENT_SHADER);  
+    
+    if(!vertexShader || !fragmentShader) {
+        return false; 
+    }
+    
+    SPDLOG_INFO(" vertex shader id: {}", vertexShader->Get()); 
+    SPDLOG_INFO(" fragment shader id: {}", fragmentShader->Get()); 
+    
+    m_programPtr =KProgram::CreateProgram({vertexShader, fragmentShader}); 
+    if(!m_programPtr) return false; 
+    SPDLOG_INFO(" program id {}", m_programPtr->Get()); 
+
+    glClearColor(0.0f, 0.0f, 0.2f, 0.0f); //한번만 .. 해도. 
+
+    return true;
+}

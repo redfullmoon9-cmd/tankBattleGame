@@ -29,10 +29,13 @@ private:
     uint32_t m_vertexBufferObject{0}; 
     uint32_t m_indexBufferObejct{0}; //
     KContext(){}; 
-    bool Init(); 
+    bool Init(); //텍스쳐 사용하기 위한 리소스 복사, image 클래스 생성. 
     bool InitRef1(); // 정점3개 삼각형, 정점4개 사각형 그리기 참조소스 
     bool InitRef2(); // 사각형 그리기 참조소스 
     bool InitRef3(); // 리팩토링해서 vertex, prgoram shader 분리. 
+    bool InitRef4(); // 리팩토링해서 vertex, prgoram shader 분리. 정점별로 색상변하는 사각형.  
+
+    uint32_t m_texture; 
 }; 
 
 

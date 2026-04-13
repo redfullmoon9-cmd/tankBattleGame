@@ -3,6 +3,7 @@
 
 #include "kcommon.h"
 
+//테스쳐 파일 불러오기
 class Kimage{
 public:
     static std::unique_ptr<Kimage> load(const std::string& filePath ); 
