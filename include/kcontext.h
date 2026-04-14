@@ -6,6 +6,7 @@
 #include "kprogram.h"
 #include "kvertex.h"
 #include "kbuffer.h"
+#include "ktexture.h"
 
 class KContext{
 public:
@@ -22,6 +23,9 @@ public:
     std::unique_ptr<KVertex> m_vertexPtr=nullptr; 
     std::unique_ptr<KBuffer> m_vertexBufferPtr=nullptr; 
     std::unique_ptr<KBuffer> m_indexBufferPtr=nullptr; 
+  
+    std::unique_ptr<KTexture> m_texturePtr=nullptr; 
+    std::unique_ptr<KTexture> m_texturePtr2=nullptr; //텍스쳐 2개를 사용하기 위해서 
 
 private:
     unsigned int VBO, VAO;//참조소스용 변수. 
@@ -35,7 +39,7 @@ private:
     bool InitRef3(); // 리팩토링해서 vertex, prgoram shader 분리. 
     bool InitRef4(); // 리팩토링해서 vertex, prgoram shader 분리. 정점별로 색상변하는 사각형.  
 
-    uint32_t m_texture; 
+    // uint32_t m_texture; 
 }; 
 
 

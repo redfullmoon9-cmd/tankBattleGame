@@ -1,5 +1,6 @@
 #include "kcontext.h"
 #include "kimage.h"
+#include "ktexture.h"
 
 std::unique_ptr<KContext> KContext::CreateContext(uint32_t mode)
 {
@@ -130,19 +131,35 @@ bool KContext::Init()
     auto image =Kimage::load("resources/image/container.jpg");
     if(!image) return false; 
     SPDLOG_INFO("image {}X{}, {}channels", image->getWidth(), image->getHeight(), image->getChannelCount());  
+    
+    //체커 이미지를 생성한다. 
+    // auto image =Kimage::Create(512, 512); 
+    // image->setCheckImage(16, 16); 
+    
+    //texture --> kTexture class 로 이동
+    m_texturePtr= KTexture::CreateFromImage(image.get()); 
+    
+    //현재는 마지막 것만 나온다. 이유는 VS FS 쪽에서 하나만 선언하고 있기에. 
+    auto image2=Kimage::load("resources/image/awesomeface.png"); 
+    if(!image2) return false; 
+    SPDLOG_INFO("image2 {}X{}, {}channels", image->getWidth(), image->getHeight(), image->getChannelCount());  
+    
+    m_texturePtr2= KTexture::CreateFromImage(image2.get()); 
 
-    //texture 
-    glGenTextures(1, &m_texture); 
-    glBindTexture(GL_TEXTURE_2D, m_texture); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); //모서리 컬러값을 가져다 쓰는 방식
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); 
+    //여러장의 텍스쳐를 사용하기 위해서. 
+    //텍스쳐 슬롯의 번호를 가르쳐 준다. 0번 슬롯. 
+    glActiveTexture(GL_TEXTURE0); 
+    //2d 테스쳐를 처음에 만든 텍스쳐 아이디 1 에 바인딩. 
+    glBindTexture(GL_TEXTURE_2D, m_texturePtr->Get()); 
 
-    //GPU로 복사하는 부분으로 cpu 메모리에 있는 그림의 형태를 알려준다. 
-    //interalFormat 변경. GL_RED의 경우 red channel만 복사된다. 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->getWidth(), image->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, image->getData()); 
+    //1번 슬롯으로 다시 바꾼다. 어썸페이스 
+    glActiveTexture(GL_TEXTURE1); 
+    glBindTexture(GL_TEXTURE_2D, m_texturePtr2->Get()); 
+    
+    m_programPtr->Use(); 
 
+    glUniform1i(glGetUniformLocation(m_programPtr->Get(), "tex"), 0); 
+    glUniform1i(glGetUniformLocation(m_programPtr->Get(), "tex2"), 1); 
     return true;
 }
 
