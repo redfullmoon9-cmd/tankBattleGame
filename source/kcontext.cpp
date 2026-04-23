@@ -77,8 +77,19 @@ KContext::~KContext()
 
 }
 
+//현재 설치한 glm을 위한 테스트 코드. 
+void KContext::testGlm()
+{
+    glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f); //위치 (1, 0, 0)에 대한 동차좌표계 사용하기. 
+    auto trans = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 0.0f)); 
+    auto rot=glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    auto scale= glm::scale(glm::mat4(1.0f), glm::vec3(3.0f)); 
+    vec= trans* rot* scale * vec; 
+    
+    SPDLOG_INFO("transformed vec : [{}, {}, {}]", vec.x, vec.y, vec.z); 
+}
 
-// 텍스쳐 정보 가져와서 읽기. 정점정보에 xyx rgb값 이외에 텍스쳐 정보  
+// 텍스쳐 정보 가져와서 읽기. 정점정보에 xyx rgb값 이외에 텍스쳐 정보
 bool KContext::Init()
 {
     SPDLOG_INFO(" context init  mode =3, 텍스쳐 그리기"); 
@@ -160,6 +171,9 @@ bool KContext::Init()
 
     glUniform1i(glGetUniformLocation(m_programPtr->Get(), "tex"), 0); 
     glUniform1i(glGetUniformLocation(m_programPtr->Get(), "tex2"), 1); 
+
+    testGlm(); 
+
     return true;
 }
 

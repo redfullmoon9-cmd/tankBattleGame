@@ -16,6 +16,7 @@ public:
     void RenderRef2(); //삼각형그리기 참조용 소스 
     void RenderRef3(); //시간의 변화를 이용한 색상변화 애니메이션. 
 
+
     ~KContext(); 
     // uint32_t m_program =0; //--> KProgram 
     // std::unique_ptr<KShader> m_shader=nullptr; 
@@ -26,6 +27,8 @@ public:
   
     std::unique_ptr<KTexture> m_texturePtr=nullptr; 
     std::unique_ptr<KTexture> m_texturePtr2=nullptr; //텍스쳐 2개를 사용하기 위해서 
+
+    void testGlm(); 
 
 private:
     unsigned int VBO, VAO;//참조소스용 변수. 

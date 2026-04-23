@@ -11,7 +11,7 @@ file(GLOB_RECURSE SOURCES "source/*.cpp" "source/*.c")
 # 2. 패키지 찾기 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
-# find_package(spdlog REQUIRED) #  spdlog 로컬에 받아서 서브 모듈방식으로 사용하기.  
+find_package(glm REQUIRED)
 
 # 방법 A: 소스를 직접 포함 (가장 빠름)
 set(SPDLOG_BUILD_ALL OFF) 
@@ -27,8 +27,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 # 5. 라이브러리 연결
-# target_link_libraries(TankGame OpenGL::GL GLEW::GLEW glfw) //glew
-target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw spdlog::spdlog)
+target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw spdlog::spdlog glm::glm)
 
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/shaders" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/resources" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")

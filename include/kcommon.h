@@ -9,6 +9,9 @@
 #include <sstream>
 #include <string>
 #include <optional>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 std::optional<std::string> loadTextFile(const std::string& fileName); 
 
