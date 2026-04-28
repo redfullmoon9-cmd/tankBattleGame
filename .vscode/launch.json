@@ -10,9 +10,8 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [
-                {"name": "DEBUGINFOD_URLS", "value": ""}
+                {"name": "DEBUGINFOD_URLS", "value": "0"}
             ],
-            // "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [

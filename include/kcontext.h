@@ -28,7 +28,7 @@ public:
     std::unique_ptr<KTexture> m_texturePtr=nullptr; 
     std::unique_ptr<KTexture> m_texturePtr2=nullptr; //텍스쳐 2개를 사용하기 위해서 
 
-    void testGlm(); 
+    void testGlm(); //glm을 이용한 형변환 테스트 코드 
 
 private:
     unsigned int VBO, VAO;//참조소스용 변수. 

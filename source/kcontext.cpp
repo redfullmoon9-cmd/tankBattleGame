@@ -77,12 +77,16 @@ KContext::~KContext()
 
 }
 
-//현재 설치한 glm을 위한 테스트 코드. 
+//glm을 위한 테스트 코드. 
 void KContext::testGlm()
 {
-    glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f); //위치 (1, 0, 0)에 대한 동차좌표계 사용하기. 
+    //위치 (1, 0, 0)에 대한 동차좌표계 사용하기. 
+    glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f); 
+    // glm::mat4(1.0f) 대각성분이 1로 만들어진 단위 행렬을 구성하고, glm:vec3(1,1,0) 만큼(x, y 를 각각 1만큼) 평행이동
     auto trans = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 0.0f)); 
+    //단위 행렬기준 glm::radians() 값 만큼 z 축으로 회전 
     auto rot=glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    //단위 행렬값의 크기를 각각 3만큼 확대  시키. 
     auto scale= glm::scale(glm::mat4(1.0f), glm::vec3(3.0f)); 
     vec= trans* rot* scale * vec; 
     
@@ -172,7 +176,24 @@ bool KContext::Init()
     glUniform1i(glGetUniformLocation(m_programPtr->Get(), "tex"), 0); 
     glUniform1i(glGetUniformLocation(m_programPtr->Get(), "tex2"), 1); 
 
-    testGlm(); 
+    //GLM test code 
+    // testGlm(); 
+    // auto transform=glm::mat4(1.0f); //메트릭스가 단위 행렬이 된다. 
+
+    // x축으로 0.3 만큼 이동
+    // auto transform=glm::translate(glm::mat4(1.0f), glm::vec3(0.3f, 0.2f, 0.0f) ); 
+
+    // 0.5만큼 축소하고, z축을 기준으로 90도 만큼 회전 시키기
+    auto transform = glm::rotate(
+        glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)), 
+        glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 0.1f)
+    ); 
+
+    //texture.vs에 사용된 변수 명 transform으로 찾는다. 
+    auto transformLoc=glGetUniformLocation(m_programPtr-> Get(), "transform"); 
+    //트랜스폼 매트릭스의 값에 다음의 값들을 세팅힌다. 
+    // --> LOC의 위치,  1 메트릭스 하나, 트랜스포즈여부, 밸류의 포인터 값을 얻어와서 gpu에 세팅
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform) ); 
 
     return true;
 }
