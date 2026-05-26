@@ -21,12 +21,24 @@ std::unique_ptr<KContext> KContext::CreateContext(uint32_t mode)
     return std::move(context); 
 }
 
+//큐브그리기,뎁스 버퍼를 사용하기 -->이전에 앞뒤와 깊이가 없어던 것에 모양이 잡힌다. 
+//--> 선형변환을 이곳에서 다시 한번 적용해서 매 프레임마다 해서 적용하기. 
 void KContext::Render()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST); 
     // 쉐이더 프로그램 사용 
     m_programPtr->Use(); 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //사각형 그리기
+
+    auto projection =glm::perspective(glm::radians(45.0f), (float) 800/ (float) 600, 0.01f, 10.f); 
+    auto view =glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)); 
+    auto model =glm::rotate(glm::mat4(1.0f), glm::radians((float)glfwGetTime()*120.0f ), glm::vec3(1.0f, 0.5f, 0.0f));
+    auto transform = projection * view * model; 
+    
+    m_programPtr->setUniform("transform", transform); 
+
+    // 36개의 점으로 큐브를 그린다. 
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0); //사각형 그리기
 }
 
 //삼각형 그리기 참조코드 
@@ -72,6 +84,14 @@ void KContext::RenderRef3()
 
 }
 
+void KContext::RenderRef4()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    // 쉐이더 프로그램 사용 
+    m_programPtr->Use(); 
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //사각형 그리기
+}
+
 KContext::~KContext()
 {
 
@@ -93,37 +113,64 @@ void KContext::testGlm()
     SPDLOG_INFO("transformed vec : [{}, {}, {}]", vec.x, vec.y, vec.z); 
 }
 
+// vertices 값을 큐브로 변경하기, 큐브그리기 
 // 텍스쳐 정보 가져와서 읽기. 정점정보에 xyx rgb값 이외에 텍스쳐 정보
 bool KContext::Init()
 {
     SPDLOG_INFO(" context init  mode =3, 텍스쳐 그리기"); 
 
-    //정점 정보는 텍스쳐를 담기 위해서 x,y,z,r,g,b, s, t 값을 저장해야. s,t는 텍스쳐 코디네이트 
-    float vertices[] = { 
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,  
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, 
-        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f 
+    float vertices[] = {
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
+
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
+
+        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+
+        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f,
     };
-    // 위 정점의 인덱스를 아래 구조체에서 저장 처음 정점 0 1 3 을 사용해서 삼각형 하나를 그리고, 다음 정점 인덱스 1 2 3 으로 그림. 
-    //이 사각형의 예제에서는 일레멘트(혹 인덱스 어레이 )버퍼를 사용한다. (이전의 삼각형 예에서는 어레이버퍼사용 Array Buffer)
-    uint32_t indices[] = { // 삼각형 2개로 사각형을 그림
-        0, 1, 3, // first triangle
-        1, 2, 3, // second triangle
+
+    // 한면당 2개의 삼각형이 있어야 하기에 모두 12개의 삼각형이 필요. 
+    //면 마다 인덱스가 6개.     
+    uint32_t indices[] = {
+         0,  2,  1,  2,  0,  3,
+         4,  5,  6,  6,  7,  4,
+         8,  9, 10, 10, 11,  8,
+        12, 14, 13, 14, 12, 15,
+        16, 17, 18, 18, 19, 16,
+        20, 22, 21, 22, 20, 23,
     };
 
     m_vertexPtr=KVertex::CreateVertex(); 
-    m_vertexBufferPtr=KBuffer::CreateBufferWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices, sizeof(float)*32); 
+    m_vertexBufferPtr=KBuffer::CreateBufferWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices, sizeof(float)*120); //5* 24 =120  
 
 
-    //vertices가 어떤 모양새로 생겼는지를 기술해 주는 부분. 
-    //어트리뷰트 0을 정점, 1은 컬러값을 가져 가도록, stride, offset 값 기술
-    //어트리뷰트 2는 텍스쳐에 관한 정보이고 텍스쳐 코디네이트는 2차원, 앞에서 6개의 정보를 뛰어 넘어야 처음 나온다. 
-    m_vertexPtr->setAttribute(0,3, GL_FLOAT, GL_FALSE, sizeof(float)*8, 0); 
-    m_vertexPtr->setAttribute(1,3, GL_FLOAT, GL_FALSE, sizeof(float)*8, sizeof(float)*3); 
-    m_vertexPtr->setAttribute(2,2, GL_FLOAT, GL_FALSE, sizeof(float)*8, sizeof(float)*6); 
+    //vertices가 어떤 모양새로 생겼는지를 기술해 주는 부분. 스트라이드 값이 5
+    m_vertexPtr->setAttribute(0,3, GL_FLOAT, GL_FALSE, sizeof(float)*5, 0);     
+    m_vertexPtr->setAttribute(2,2, GL_FLOAT, GL_FALSE, sizeof(float)*5, sizeof(float)*3); 
     
-    m_indexBufferPtr=KBuffer::CreateBufferWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(uint32_t)*6 ); 
+    m_indexBufferPtr=KBuffer::CreateBufferWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(uint32_t)*36 ); 
 
     
     // 2. 쉐이더 객체 생성 - 각 파일들을 읽어 온다.
@@ -147,10 +194,6 @@ bool KContext::Init()
     if(!image) return false; 
     SPDLOG_INFO("image {}X{}, {}channels", image->getWidth(), image->getHeight(), image->getChannelCount());  
     
-    //체커 이미지를 생성한다. 
-    // auto image =Kimage::Create(512, 512); 
-    // image->setCheckImage(16, 16); 
-    
     //texture --> kTexture class 로 이동
     m_texturePtr= KTexture::CreateFromImage(image.get()); 
     
@@ -172,28 +215,23 @@ bool KContext::Init()
     glBindTexture(GL_TEXTURE_2D, m_texturePtr2->Get()); 
     
     m_programPtr->Use(); 
+    m_programPtr->setUniform("tex", 0); 
+    m_programPtr->setUniform("tex2", 1); 
 
-    glUniform1i(glGetUniformLocation(m_programPtr->Get(), "tex"), 0); 
-    glUniform1i(glGetUniformLocation(m_programPtr->Get(), "tex2"), 1); 
+    // x축으로 -55.0도 회전 
+    auto model = glm::rotate(glm::mat4(1.0f), glm::radians(-55.0f), glm::vec3(1.0f, 0.0f,0.0f )); 
+    //카메라는 원심으로 부터 z축 방향으로 -3만큼 떨어져 있음. 
+    auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)); 
 
-    //GLM test code 
-    // testGlm(); 
-    // auto transform=glm::mat4(1.0f); //메트릭스가 단위 행렬이 된다. 
+    //종횡비는 4:3으로 세로 화각으로 45도의 원근 투영 --> 현재의 종횡비 값은? testmain.cpp에서 800 /600 으로 향후 헤더파일로 전체값 이동. 
+    auto projection = glm::perspective(glm::radians(45.0f), (float)800/ (float) 600, 0.01f, 10.f); 
 
-    // x축으로 0.3 만큼 이동
-    // auto transform=glm::translate(glm::mat4(1.0f), glm::vec3(0.3f, 0.2f, 0.0f) ); 
-
-    // 0.5만큼 축소하고, z축을 기준으로 90도 만큼 회전 시키기
-    auto transform = glm::rotate(
-        glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)), 
-        glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 0.1f)
-    ); 
+    // auto transform =model * view * projection; 
+    auto transform =projection  *view *model; 
+    m_programPtr->setUniform("transform", transform); 
 
     //texture.vs에 사용된 변수 명 transform으로 찾는다. 
     auto transformLoc=glGetUniformLocation(m_programPtr-> Get(), "transform"); 
-    //트랜스폼 매트릭스의 값에 다음의 값들을 세팅힌다. 
-    // --> LOC의 위치,  1 메트릭스 하나, 트랜스포즈여부, 밸류의 포인터 값을 얻어와서 gpu에 세팅
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform) ); 
 
     return true;
 }
@@ -403,7 +441,7 @@ bool KContext::InitRef3()
     return true;
 }
 
-//인덱스 버퍼를 사용해서 사각형 그리기, refactoring 된 버전 
+// 인덱스 버퍼를 사용해서 사각형 그리기, refactoring 된 버전 
 // 버텍스 정보에 여러가지 담기. vertices정보값이 처음은 좌표 정보, 그다음이 컬러 정보로 구성, 
 // per_vertex_color.vs fs를 이용해서 정점별로 색상이 변하는 예제 
 bool KContext::InitRef4()
@@ -455,4 +493,127 @@ bool KContext::InitRef4()
     glClearColor(0.0f, 0.0f, 0.2f, 0.0f); //한번만 .. 해도. 
 
     return true;
+}
+
+//선형변환.큐브 그리기 이전까지 작성된 코드 
+bool KContext::InitRef5()
+{
+    SPDLOG_INFO(" context init  mode =3, 텍스쳐 그리기"); 
+
+    //정점 정보는 텍스쳐를 담기 위해서 x,y,z,r,g,b, s, t 값을 저장해야. s,t는 텍스쳐 코디네이트 
+    float vertices[] = { 
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,  
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, 
+        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f 
+    };
+    // 위 정점의 인덱스를 아래 구조체에서 저장 처음 정점 0 1 3 을 사용해서 삼각형 하나를 그리고, 다음 정점 인덱스 1 2 3 으로 그림. 
+    //이 사각형의 예제에서는 일레멘트(혹 인덱스 어레이 )버퍼를 사용한다. (이전의 삼각형 예에서는 어레이버퍼사용 Array Buffer)
+    uint32_t indices[] = { // 삼각형 2개로 사각형을 그림
+        0, 1, 3, // first triangle
+        1, 2, 3, // second triangle
+    };
+
+    m_vertexPtr=KVertex::CreateVertex(); 
+    m_vertexBufferPtr=KBuffer::CreateBufferWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices, sizeof(float)*32); 
+
+
+    //vertices가 어떤 모양새로 생겼는지를 기술해 주는 부분. 
+    //어트리뷰트 0을 정점, 1은 컬러값을 가져 가도록, stride, offset 값 기술
+    //어트리뷰트 2는 텍스쳐에 관한 정보이고 텍스쳐 코디네이트는 2차원, 앞에서 6개의 정보를 뛰어 넘어야 처음 나온다. 
+    m_vertexPtr->setAttribute(0,3, GL_FLOAT, GL_FALSE, sizeof(float)*8, 0); 
+    m_vertexPtr->setAttribute(1,3, GL_FLOAT, GL_FALSE, sizeof(float)*8, sizeof(float)*3); 
+    m_vertexPtr->setAttribute(2,2, GL_FLOAT, GL_FALSE, sizeof(float)*8, sizeof(float)*6); 
+    
+    m_indexBufferPtr=KBuffer::CreateBufferWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(uint32_t)*6 ); 
+
+    
+    // 2. 쉐이더 객체 생성 - 각 파일들을 읽어 온다.
+    std::shared_ptr<KShader> vertexShader = KShader::CreateFromFile("shaders/texture.vs", GL_VERTEX_SHADER);  
+    std::shared_ptr<KShader> fragmentShader  = KShader::CreateFromFile("shaders/texture.fs", GL_FRAGMENT_SHADER);  
+    
+    if(!vertexShader || !fragmentShader) {
+        return false; 
+    }
+    
+    SPDLOG_INFO(" vertex shader id: {}", vertexShader->Get()); 
+    SPDLOG_INFO(" fragment shader id: {}", fragmentShader->Get()); 
+    
+    m_programPtr =KProgram::CreateProgram({vertexShader, fragmentShader}); 
+    if(!m_programPtr) return false; 
+    SPDLOG_INFO(" program id {}", m_programPtr->Get()); 
+
+    glClearColor(0.0f, 0.0f, 0.2f, 0.0f); 
+
+    auto image =Kimage::load("resources/image/container.jpg");
+    if(!image) return false; 
+    SPDLOG_INFO("image {}X{}, {}channels", image->getWidth(), image->getHeight(), image->getChannelCount());  
+    
+    //체커 이미지를 생성한다. 
+    // auto image =Kimage::Create(512, 512); 
+    // image->setCheckImage(16, 16); 
+    
+    //texture --> kTexture class 로 이동
+    m_texturePtr= KTexture::CreateFromImage(image.get()); 
+    
+    //현재는 마지막 것만 나온다. 이유는 VS FS 쪽에서 하나만 선언하고 있기에. 
+    auto image2=Kimage::load("resources/image/awesomeface.png"); 
+    if(!image2) return false; 
+    SPDLOG_INFO("image2 {}X{}, {}channels", image->getWidth(), image->getHeight(), image->getChannelCount());  
+    
+    m_texturePtr2= KTexture::CreateFromImage(image2.get()); 
+
+    //여러장의 텍스쳐를 사용하기 위해서. 
+    //텍스쳐 슬롯의 번호를 가르쳐 준다. 0번 슬롯. 
+    glActiveTexture(GL_TEXTURE0); 
+    //2d 테스쳐를 처음에 만든 텍스쳐 아이디 1 에 바인딩. 
+    glBindTexture(GL_TEXTURE_2D, m_texturePtr->Get()); 
+
+    //1번 슬롯으로 다시 바꾼다. 어썸페이스 
+    glActiveTexture(GL_TEXTURE1); 
+    glBindTexture(GL_TEXTURE_2D, m_texturePtr2->Get()); 
+    
+    m_programPtr->Use(); 
+
+    glUniform1i(glGetUniformLocation(m_programPtr->Get(), "tex"), 0); 
+    glUniform1i(glGetUniformLocation(m_programPtr->Get(), "tex2"), 1); 
+
+    //GLM test code 
+    // testGlm(); 
+    // auto transform=glm::mat4(1.0f); //메트릭스가 단위 행렬이 된다. 
+
+    //선형변환 **************************************  */
+    // x축으로 0.3, y축 으로 0.2 만큼 이동
+    // auto transform=glm::translate(glm::mat4(1.0f), glm::vec3(0.3f, 0.2f, 0.0f) ); 
+    
+    //선형변환 ************************************* */
+    // 0.5만큼 축소하고, z축을 기준으로 90도 만큼 회전 시키기
+    // auto transform = glm::rotate(
+    //     glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)), 
+    //     glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 0.1f)
+    // ); 
+
+    //선형변환 현재 소스 작동 안됨. ??? ************************************* */
+    //-->해결 수학적 정점에 사용되는 변환은 모델 뷰 프로젝션순서 이어햐 하고 실제 코드는 이를 반대로 구성해야. 
+
+    // x축으로 -55.0도 회전 
+    auto model = glm::rotate(glm::mat4(1.0f), glm::radians(-55.0f), glm::vec3(1.0f, 0.0f,0.0f )); 
+    //카메라는 원심으로 부터 z축 방향으로 -3만큼 떨어져 있음. 
+    auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)); 
+
+    //종횡비는 4:3으로 세로 화각으로 45도의 원근 투영 --> 현재의 종횡비 값은? testmain.cpp에서 800 /600 으로 향후 헤더파일로 전체값 이동. 
+    auto projection = glm::perspective(glm::radians(45.0f), (float)800/ (float) 600, 0.01f, 10.f); 
+
+    // auto transform =model * view * projection; 
+    auto transform =projection  *view *model; 
+
+    //texture.vs에 사용된 변수 명 transform으로 찾는다. 
+    auto transformLoc=glGetUniformLocation(m_programPtr-> Get(), "transform"); 
+
+    //트랜스폼 매트릭스의 값에 다음의 값들을 세팅힌다. 
+    // --> LOC의 위치,  1 메트릭스 하나, 트랜스포즈여부, 밸류의 포인터 값을 얻어와서 gpu에 세팅
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform) ); 
+
+    return true;
+   
 }

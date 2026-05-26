@@ -11,10 +11,11 @@
 class KContext{
 public:
     static std::unique_ptr<KContext> CreateContext(uint32_t mode); 
-    void Render(); 
+    void Render(); //큐브 그리기 
     void RenderRef(); //삼각형그리기 참조용 소스 
-    void RenderRef2(); //삼각형그리기 참조용 소스 
+    void RenderRef2(); //
     void RenderRef3(); //시간의 변화를 이용한 색상변화 애니메이션. 
+    void RenderRef4(); //initref5에 짝하는 코드 
 
 
     ~KContext(); 
@@ -36,11 +37,12 @@ private:
     uint32_t m_vertexBufferObject{0}; 
     uint32_t m_indexBufferObejct{0}; //
     KContext(){}; 
-    bool Init(); //텍스쳐 사용하기 위한 리소스 복사, image 클래스 생성. 
+    bool Init(); //큐브그리기 변경. 
     bool InitRef1(); // 정점3개 삼각형, 정점4개 사각형 그리기 참조소스 
     bool InitRef2(); // 사각형 그리기 참조소스 
     bool InitRef3(); // 리팩토링해서 vertex, prgoram shader 분리. 
     bool InitRef4(); // 리팩토링해서 vertex, prgoram shader 분리. 정점별로 색상변하는 사각형.  
+    bool InitRef5(); // 사각형 텍스쳐를 선형변화 하는 예제 .  
 
     // uint32_t m_texture; 
 }; 

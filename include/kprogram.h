@@ -11,6 +11,9 @@ public:
     uint32_t Get(){return m_program; }
     ~KProgram();
     void Use() const; 
+
+    void setUniform(const std::string& name, int value) const; 
+    void setUniform(const std::string& name, const glm::mat4& value) const;
 private:
     KProgram(){} 
     bool LinkProgram(const std::vector<std::shared_ptr<KShader>>& shaders); 
